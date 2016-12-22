@@ -13,6 +13,9 @@ from wsproto.events import DataReceived, BytesReceived, TextReceived
 
 from cuiows.exc import WebsocketClosedError
 
+# Sentinel value.
+CONNECTION_FAILED = object()
+
 
 class WSClient(object):
     """
@@ -139,6 +142,11 @@ class WSClient(object):
         await self._closed.set()
         self._closed_event = event
 
+        # This is hacky, but it cancels all the tasks currently waiting on the queue.
+        for task in self.event_queue._get_waiting.copy():
+            # Put a CONNECTION_FAILED onto the queue, so that they all wake up and raise.
+            await self.event_queue.put(CONNECTION_FAILED)
+
     async def _reader_task(self):
         """
         A reader tasked spawned by curio to read data.
@@ -230,7 +238,9 @@ class WSClient(object):
         if self.closed:
             raise WebsocketClosedError(self._closed_event.code, self._closed_event.reason)
 
-        return await self.event_queue.get()
+        i = await self.event_queue.get()
+        if i == CONNECTION_FAILED:
+            raise WebsocketClosedError(self._closed_event.code, self._closed_event.reason)
 
     async def poll(self, decode: bool=False, *, encoding: str="utf-8") -> typing.Union[str, bytes]:
         """
