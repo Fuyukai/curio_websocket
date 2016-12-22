@@ -138,6 +138,7 @@ class WSClient(object):
         """
         await self._closed.set()
         self._closed_event = event
+        await self._rd_task.cancel()
 
     async def _reader_task(self):
         """
@@ -200,7 +201,10 @@ class WSClient(object):
         """
         self.ws_state_machine.close(code=code, reason=reason)
         data = self.ws_state_machine.bytes_to_send()
-        await self.connection.send(data)
+        try:
+            await self.connection.send(data)
+        except (OSError, ConnectionError):
+            pass
 
         if wait:
             await self.wait_for_close()
