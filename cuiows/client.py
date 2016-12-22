@@ -198,7 +198,7 @@ class WSClient(object):
                         # It works(tm)
                         if event.message_finished:
                             event.data = self._text_buffer + event.data
-                            self._buffer = ""
+                            self._text_buffer = ""
                             await self.event_queue.put(event)
                         else:
                             # Buffer the event data, for later usage.
@@ -288,7 +288,7 @@ class WSClient(object):
             if decode:
                 return event.data.decode(encoding)
             else:
-                return event.data
+                return bytes(event.data)
 
     async def send(self, data: typing.Union[str, bytes], *, encoding: str="utf-8"):
         """
