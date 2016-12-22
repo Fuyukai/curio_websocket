@@ -136,7 +136,7 @@ class WSClient(object):
 
         This will set the closed flag, and close the connection.
         """
-        await self.closed.set()
+        await self._closed.set()
         self._closed_event = event
 
     async def _reader_task(self):
