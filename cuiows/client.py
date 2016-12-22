@@ -242,6 +242,8 @@ class WSClient(object):
         if i == CONNECTION_FAILED:
             raise WebsocketClosedError(self._closed_event.code, self._closed_event.reason)
 
+        return i
+
     async def poll(self, decode: bool=False, *, encoding: str="utf-8") -> typing.Union[str, bytes]:
         """
         Polls for the next event data.
