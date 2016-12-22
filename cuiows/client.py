@@ -138,7 +138,6 @@ class WSClient(object):
         """
         await self._closed.set()
         self._closed_event = event
-        await self._rd_task.cancel()
 
     async def _reader_task(self):
         """
