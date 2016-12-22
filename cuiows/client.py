@@ -59,6 +59,11 @@ class WSClient(object):
         #: The ready event. This is set when a ready event is received.
         self._ready = curio.Event()
 
+        #: The current data buffer.
+        #: This is used to buffer incoming data when the message is not complete.
+        self._buffer = b""
+        self._text_buffer = ""
+
     @property
     def closed(self):
         """
@@ -176,7 +181,26 @@ class WSClient(object):
                         await self._ready.set()
                         continue
 
-                    await self.event_queue.put(event)
+                    if isinstance(event, BytesReceived):
+                        # Make sure we've got the end of the event first.
+                        if event.message_finished:
+                            event.data = self._buffer + event.data
+                            self._buffer = b""
+                            await self.event_queue.put(event)
+                        else:
+                            # Buffer the event data, for later usage.
+                            self._buffer += event.data
+
+                    elif isinstance(event, TextReceived):
+                        # I honestly don't care enough to make this better
+                        # It works(tm)
+                        if event.message_finished:
+                            event.data = self._text_buffer + event.data
+                            self._buffer = ""
+                            await self.event_queue.put(event)
+                        else:
+                            # Buffer the event data, for later usage.
+                            self._text_buffer += event.data
 
     # User API
     async def wait_for_ready(self):
