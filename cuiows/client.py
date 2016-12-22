@@ -99,7 +99,9 @@ class WSClient(object):
         else:
             ssl = None
 
-        return await cls.connect_host_port(url.host, url.port, url.path,
+        path = url.path + "?" + url.raw_query_string
+
+        return await cls.connect_host_port(url.host, url.port, path,
                                            use_ssl=ssl is not None, ssl_context=ssl)
 
     @classmethod
@@ -114,7 +116,7 @@ class WSClient(object):
         :return: A new :class:`WSClient` object that is connected to the server.
         """
         obb = cls(host, port, path, *args, **kwargs)
-        obb.logger.debug("Opening websocket connection to {}:{}".format(host, port))
+        obb.logger.debug("Opening websocket connection to {}:{}{}".format(host, port, path))
         if obb.ssl_context:
             server_hostname = host
         else:
