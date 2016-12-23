@@ -242,6 +242,9 @@ class WSClient(object):
         if wait:
             await self.wait_for_close()
 
+        if self._closed_event is None:
+            self._closed_event = ConnectionClosed(code=code, reason=reason)
+
         self.logger.debug("Cancelling reader task")
         await self._rd_task.cancel()
         await self.connection.close()
@@ -252,8 +255,8 @@ class WSClient(object):
 
         This will send a close frame, then close the connection.
         """
-        await self._closed.set()
         await self.close(code, reason, wait=False)
+        await self._fail(self._closed_event)
         self.logger.debug("Closed websocket connection")
 
     async def poll_event(self) -> DataReceived:
