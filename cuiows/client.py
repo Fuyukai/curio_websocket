@@ -150,7 +150,13 @@ class WSClient(object):
         self._closed_event = event
 
         # This is hacky, but it cancels all the tasks currently waiting on the queue.
-        for task in self.event_queue._get_waiting.copy():
+        try:
+            queue = self.event_queue._get_waiting._queue.copy()
+        except AttributeError:
+            # Old versions of curio
+            queue = self.event_queue._get_waiting.copy()
+
+        for task in queue:
             # Put a CONNECTION_FAILED onto the queue, so that they all wake up and raise.
             await self.event_queue.put(CONNECTION_FAILED)
 
