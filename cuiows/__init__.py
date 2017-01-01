@@ -6,4 +6,4 @@ from cuiows.client import WSClient
 
 __all__ = "WSClient",
 
-__version__ = "0.1.2"
+__version__ = "0.1.3"

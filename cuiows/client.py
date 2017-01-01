@@ -174,7 +174,7 @@ class WSClient(object):
                 try:
                     data = await self.connection.recv(65535)
                 except (OSError, ConnectionError):
-                    self._closed = True
+                    await self._closed.set()
                     return
 
                 self.ws_state_machine.receive_bytes(data)
