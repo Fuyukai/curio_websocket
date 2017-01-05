@@ -173,8 +173,10 @@ class WSClient(object):
             while True:
                 try:
                     data = await self.connection.recv(65535)
+                    if not data:
+                        raise ConnectionError
                 except (OSError, ConnectionError):
-                    await self._closed.set()
+                    await self.close(code=1006, reason="Connection lost")
                     return
 
                 self.ws_state_machine.receive_bytes(data)
@@ -316,5 +318,8 @@ class WSClient(object):
         self.ws_state_machine.send_data(data)
         bytes = self.ws_state_machine.bytes_to_send()
 
-        await self.connection.send(bytes)
+        try:
+            await self.connection.send(bytes)
+        except (OSError, ConnectionError):
+            raise WebsocketClosedError(1006, reason="Connection lost")
 
