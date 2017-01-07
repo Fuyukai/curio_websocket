@@ -321,5 +321,6 @@ class WSClient(object):
         try:
             await self.connection.send(bytes)
         except (OSError, ConnectionError):
+            await self.close_now(code=1006, reason="Connection lost")
             raise WebsocketClosedError(1006, reason="Connection lost")
 
