@@ -176,7 +176,7 @@ class WSClient(object):
                     if not data:
                         raise ConnectionError
                 except (OSError, ConnectionError):
-                    await self.close(code=1006, reason="Connection lost", wait=False)
+                    await self.close_now(code=1006, reason="Connection lost")
                     return
 
                 self.ws_state_machine.receive_bytes(data)
