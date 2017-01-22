@@ -29,6 +29,5 @@ setup(
     description='A curio websocket library',
     install_requires=[
         "curio>=0.4.0",
-        "wsproto>=0.9.0"
     ],
 )

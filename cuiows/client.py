@@ -7,9 +7,9 @@ from curio.io import Socket
 from curio.ssl import create_default_context, CurioSSLContext
 import yarl
 
-from wsproto.connection import WSConnection, CLIENT, ConnectionEstablished, \
+from cuiows.wsproto.connection import WSConnection, CLIENT, ConnectionEstablished, \
     ConnectionClosed
-from wsproto.events import DataReceived, BytesReceived, TextReceived
+from cuiows.wsproto.events import DataReceived, BytesReceived, TextReceived
 
 from cuiows.exc import WebsocketClosedError
 
