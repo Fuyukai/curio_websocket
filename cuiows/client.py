@@ -4,7 +4,7 @@ import typing
 import curio
 from curio.task import Task
 from curio.io import Socket
-from curio.ssl import create_default_context, CurioSSLContext
+from curio.ssl import create_default_context, CurioSSLContext, warnings
 import yarl
 
 from cuiows.wsproto.connection import WSConnection, CLIENT, ConnectionEstablished, \
@@ -274,10 +274,16 @@ class WSClient(object):
         :return: The event data received from the websocket.
         """
         if self.closed:
+            if self._closed_event is None:
+                warnings.warn("Got a close without a closed frame!")
+                self._closed_event = ConnectionClosed(1006, reason="Unknown error")
             raise WebsocketClosedError(self._closed_event.code, self._closed_event.reason)
 
         i = await self.event_queue.get()
         if i == CONNECTION_FAILED:
+            if self._closed_event is None:
+                warnings.warn("Got a close without a closed frame!")
+                self._closed_event = ConnectionClosed(1006, reason="Unknown error")
             raise WebsocketClosedError(self._closed_event.code, self._closed_event.reason)
 
         return i
@@ -311,6 +317,9 @@ class WSClient(object):
         :param encoding: If str data is sent, this is the encoding the data will be sent as.
         """
         if self.closed:
+            if self._closed_event is None:
+                warnings.warn("Got a close without a closed frame!")
+                self._closed_event = ConnectionClosed(1006, reason="Unknown error")
             raise WebsocketClosedError(self._closed_event.code, self._closed_event.reason)
 
         if not self.ready:
