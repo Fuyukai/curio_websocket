@@ -24,10 +24,12 @@ setup(
     packages=find_packages(),
     url='https://github.com/SunDwarf/curio_websocket',
     license='MIT',
-    author='Isaac Dickinson',
-    author_email='sun@veriny.tf',
+    author='Laura Dickinson',
+    author_email='l@veriny.tf',
     description='A curio websocket library',
     install_requires=[
-        "curio>=0.4.0",
+        "curio>=0.7.0",
+        'yarl',
+        'wsproto>=0.10.0,<=0.11.0',
     ],
 )

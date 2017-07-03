@@ -2,14 +2,12 @@ import logging
 import typing
 
 import curio
-from curio.task import Task
-from curio.io import Socket
-from curio.ssl import create_default_context, CurioSSLContext, warnings
 import yarl
-
-from cuiows.wsproto.connection import WSConnection, CLIENT, ConnectionEstablished, \
-    ConnectionClosed
-from cuiows.wsproto.events import DataReceived, BytesReceived, TextReceived
+from wsproto.connection import CLIENT, ConnectionClosed, ConnectionEstablished, WSConnection
+from wsproto.events import BytesReceived, DataReceived, TextReceived
+from curio.io import Socket
+from curio.ssl import CurioSSLContext, create_default_context, warnings
+from curio.task import Task
 
 from cuiows.exc import WebsocketClosedError
 
@@ -124,7 +122,8 @@ class WSClient(object):
 
         connection = await curio.open_connection(host=obb.host, port=obb.port, ssl=obb.ssl_context,
                                                  server_hostname=server_hostname)  # type: Socket
-        obb.logger.debug("Connection {} opened, sending message to open the websocket".format(connection))
+        obb.logger.debug("Connection {} opened, sending message to open the websocket"
+                         .format(connection))
         obb.connection = connection
 
         # Write the opening event.
@@ -163,8 +162,8 @@ class WSClient(object):
     async def _reader_task(self):
         """
         A reader tasked spawned by curio to read data.
-
-        This will poll the connection, feed bytes to the state machine, then add the events to the queue.
+        This will poll the connection, feed bytes to the state machine, then add the events to the
+        queue.
         """
         if self.closed:
             return
@@ -234,8 +233,8 @@ class WSClient(object):
         """
         Closes the websocket.
 
-        This will not immediately close the connection - it will send a CLOSE frame. You can poll the close event
-        with :meth:`poll` afterwards.
+        This will not immediately close the connection - it will send a CLOSE frame. You can poll
+        the close event with :meth:`poll` afterwards.
 
         :param code: The close code to send.
         :param reason: The close reason to send.
@@ -308,13 +307,12 @@ class WSClient(object):
             else:
                 return bytes(event.data)
 
-    async def send(self, data: typing.Union[str, bytes], *, encoding: str="utf-8"):
+    async def send(self, data: typing.Union[str, bytes]):
         """
         Send a frame to the websocket.
 
         :param data: The data to send.
             This can be str or bytes. This will change the type of data frame sent.
-        :param encoding: If str data is sent, this is the encoding the data will be sent as.
         """
         if self.closed:
             if self._closed_event is None:
